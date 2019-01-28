@@ -1,0 +1,48 @@
+# created by Isak Huang 2019-01-27
+
+import cv2
+import os
+import numpy as np
+video_type = ["mp4","rmvb","avi","mkv","mov","MP4","MPG"]
+pic_type = ["jpg", "png", "bmp", "JPG", "jpeg"]
+for (root,dirs,files) in os.walk("./"):
+    for fn in files:
+        ftype = fn.split('.')[-1]
+        if ftype in video_type:
+            full_path = os.path.join(root,fn)
+            print(full_path)
+            start_frame = 10
+            video = cv2.VideoCapture(full_path)
+            # video = cv2.VideoCapture.open(full_path)
+            width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            count = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+            img_all = np.zeros((height*4, width*4, 3),dtype="uint8")
+            step = int((count - 10)/17)
+            print(start_frame, width, height, count, step)
+            if count-20 < start_frame:
+                print("count<start_frame: %s"%full_path)
+                continue
+            for i in range(16):
+                _, img = video.read()
+                cols = int(i/4)
+                rows = int(i%4)
+                img_all[rows*height:rows*height+height, cols*width:cols*width+width, :] = img
+                # print(os.path.join(root, fn.split('.')[0]+str(i)+'.jpg'))
+                # cv2.imwrite(os.path.join(root, fn.split('.')[0]+str(i)+'.jpg'), img)
+                # imagepath = os.path.join(root, fn.split('.')[0]+str(i).zfill(3)+'.jpg')
+                # cv2.imencode('.jpg', img)[1].tofile(imagepath)
+                video.set(cv2.CAP_PROP_POS_FRAMES, start_frame + i*step)
+                # print(img.shape)
+            imagepath = os.path.join(root, fn.split('.')[0]+'.jpg')
+            if os.path.exists(imagepath):
+                imagepath = os.path.join(root, fn.split('.')[0]+'_1.jpg')
+            cv2.imencode('.jpg', img_all)[1].tofile(imagepath)
+            # retval,image= video.read([,image])
+            none = video.release()
+            # snap_name =  os.path.join(root, fn.split('.')[0]+'.'+jpg)
+            # cv2.imwrite(snap_name,img)
+            # os.rename(path_old,path_dst)
+            # print(path_old)
+            # print(path_dst)
+        # print(ftype)
